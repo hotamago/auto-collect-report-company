@@ -8,5 +8,6 @@ dependencies = [
     "playwright",
     "lxml",
     "schedule",
-    "pandas"
+    "pandas",
+    "streamlit"
 ]
