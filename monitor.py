@@ -42,10 +42,10 @@ class ContentMonitor:
             with open(self.csv_file, 'r', encoding='utf-8') as file:
                 reader = csv.reader(file)
                 for row in reader:
-                    if len(row) >= 3 and row[1].strip():  # Ensure we have at least 3 columns and URL is not empty
+                    if len(row) >= 3 and row[1].strip() and row[2].strip():  # Ensure we have at least 3 columns and both URL and XPath are not empty
                         short_name = row[0].strip()
                         url = row[1].strip()
-                        xpath = row[2].strip() if len(row) > 2 else ""
+                        xpath = row[2].strip()
                         self.urls_data.append({
                             'short_name': short_name,
                             'url': url,
@@ -78,11 +78,16 @@ class ContentMonitor:
         """Update urls_data from pandas DataFrame"""
         self.urls_data = []
         for _, row in df.iterrows():
-            self.urls_data.append({
-                'short_name': str(row.get('short_name', '')).strip(),
-                'url': str(row.get('url', '')).strip(),
-                'xpath': str(row.get('xpath', '')).strip()
-            })
+            short_name = str(row.get('short_name', '')).strip()
+            url = str(row.get('url', '')).strip()
+            xpath = str(row.get('xpath', '')).strip()
+            # Only add rows that have both URL and XPath
+            if url and xpath:
+                self.urls_data.append({
+                    'short_name': short_name,
+                    'url': url,
+                    'xpath': xpath
+                })
         self.save_urls_to_csv()
 
     def get_cache_file_path(self, short_name):
@@ -275,8 +280,8 @@ class ContentMonitor:
         """Check all URLs for changes with concurrent processing"""
         print(f"\n--- Checking all URLs at {datetime.now()} (max concurrent: {self.max_concurrent}) ---")
 
-        # Filter URLs that have actual URLs
-        valid_urls = [url_data for url_data in self.urls_data if url_data['url']]
+        # Filter URLs that have actual URLs and XPath selectors
+        valid_urls = [url_data for url_data in self.urls_data if url_data['url'] and url_data['xpath']]
 
         if not valid_urls:
             print("No valid URLs to check")

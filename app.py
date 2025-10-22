@@ -75,7 +75,7 @@ if page == "Dashboard":
         st.metric("Total URLs", len(st.session_state.monitor.urls_data))
 
     with col2:
-        valid_urls = len([u for u in st.session_state.monitor.urls_data if u['url']])
+        valid_urls = len([u for u in st.session_state.monitor.urls_data if u['url'] and u['xpath']])
         st.metric("Active URLs", valid_urls)
 
     with col3:
